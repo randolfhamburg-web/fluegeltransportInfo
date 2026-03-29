@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flügeltransport Dokumentation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, serif;
+      background: #f4f1ec;
+      color: #2c2c2c;
+    }
+
+    /* ── Login ── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #f4f1ec;
+    }
+
+    .login-box {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 2.5rem 3rem;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+
+    .login-box h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+      color: #444;
+      font-weight: normal;
+      letter-spacing: 0.03em;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 0.8rem;
+      outline: none;
+    }
+
+    .login-box input:focus { border-color: #888; }
+
+    .login-box button {
+      width: 100%;
+      padding: 0.65rem;
+      font-size: 1rem;
+      background: #3a3a3a;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+
+    .login-box button:hover { background: #555; }
+
+    #error-msg {
+      display: none;
+      margin-top: 0.8rem;
+      color: #c0392b;
+      font-size: 0.9rem;
+    }
+
+    /* ── Content ── */
+    #content { display: none; }
+
+    header {
+      background: #2c2c2c;
+      color: #f0ece4;
+      padding: 1.8rem 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: normal;
+      letter-spacing: 0.05em;
+    }
+
+    header p {
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+      color: #aaa;
+    }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* ── Section ── */
+    .section {
+      margin-bottom: 3.5rem;
+    }
+
+    .section-header {
+      border-bottom: 2px solid #2c2c2c;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.25rem;
+      font-weight: normal;
+      letter-spacing: 0.04em;
+    }
+
+    .section-description {
+      background: #fff;
+      border-left: 3px solid #bbb;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #555;
+      font-style: italic;
+    }
+
+    /* ── Gallery grid ── */
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .thumb {
+      width: 300px;
+      height: 220px;
+      overflow: hidden;
+      cursor: pointer;
+      border-radius: 4px;
+      background: #ddd;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    .thumb:hover img { transform: scale(1.04); }
+
+    .thumb .caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 0.3rem 0.5rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .thumb:hover .caption { opacity: 1; }
+
+    /* ── Video thumb ── */
+    .video-thumb {
+      width: 300px;
+      cursor: pointer;
+      border-radius: 4px;
+      background: #111;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .video-thumb video {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      border-radius: 4px;
+    }
+
+    .video-play-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 52px;
+      height: 52px;
+      background: rgba(255,255,255,0.82);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: background 0.2s;
+    }
+
+    .video-thumb:hover .video-play-icon { background: rgba(255,255,255,1); }
+
+    .video-play-icon::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 11px solid transparent;
+      border-bottom: 11px solid transparent;
+      border-left: 18px solid #2c2c2c;
+      margin-left: 4px;
+    }
+
+    .video-thumb .caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 0.3rem 0.5rem;
+      border-radius: 0 0 4px 4px;
+    }
+
+    /* ── Lightbox ── */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #lightbox.active { display: flex; }
+
+    #lightbox-media {
+      max-width: 92vw;
+      max-height: 85vh;
+      border-radius: 4px;
+      object-fit: contain;
+    }
+
+    #lightbox-media video {
+      max-width: 92vw;
+      max-height: 85vh;
+      border-radius: 4px;
+    }
+
+    #lightbox-caption {
+      color: #ccc;
+      font-size: 0.9rem;
+      margin-top: 0.8rem;
+      text-align: center;
+      max-width: 80vw;
+    }
+
+    #lightbox-close {
+      position: fixed;
+      top: 1rem;
+      right: 1.2rem;
+      color: #fff;
+      font-size: 2.2rem;
+      cursor: pointer;
+      line-height: 1;
+      opacity: 0.7;
+      background: none;
+      border: none;
+    }
+
+    #lightbox-close:hover { opacity: 1; }
+
+    #lightbox-prev, #lightbox-next {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+      opacity: 0.7;
+    }
+
+    #lightbox-prev:hover, #lightbox-next:hover { opacity: 1; background: rgba(255,255,255,0.25); }
+    #lightbox-prev { left: 0.8rem; }
+    #lightbox-next { right: 0.8rem; }
+  </style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2>Dokumentation<br>Flügeltransport</h2>
+    <input type="password" id="pwd-input" placeholder="Passwort" onkeydown="if(event.key==='Enter')checkPassword()">
+    <button onclick="checkPassword()">Öffnen</button>
+    <p id="error-msg">Falsches Passwort</p>
+  </div>
+</div>
+
+<!-- ── Hauptinhalt ── -->
+<div id="content">
+  <header>
+    <h1>Flügeltransport Buchholz → Lüneburg</h1>
+    <p>Fotodokumentation</p>
+  </header>
+
+  <main>
+
+    <!-- ── Abschnitt 1: Buchholz Quelle ── -->
+    <section class="section">
+      <div class="section-header">
+        <h2>1 · Buchholz – Quellort</h2>
+      </div>
+      <div class="section-description">
+        Erläuterung folgt.
+      </div>
+      <div class="gallery" id="gallery-buchholz">
+        <div class="video-thumb" onclick="openLightboxVideo('Buchholz_Quelle/10_vonBuchholz_ueberRasenZuStellplatz_Video.mp4','Von Buchholz über Rasen zum Stellplatz')">
+          <video src="Buchholz_Quelle/10_vonBuchholz_ueberRasenZuStellplatz_Video.mp4" muted preload="metadata"></video>
+          <div class="video-play-icon"></div>
+          <div class="caption">Von Buchholz über Rasen zum Stellplatz</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/12 vomHochkampAufPrivatweg.jpg','Vom Hochkamp auf Privatweg')">
+          <img src="Buchholz_Quelle/12 vomHochkampAufPrivatweg.jpg" alt="Vom Hochkamp auf Privatweg" loading="lazy">
+          <div class="caption">Vom Hochkamp auf Privatweg</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/14PrivatwegAbwärts.jpg','Privatweg abwärts')">
+          <img src="Buchholz_Quelle/14PrivatwegAbwärts.jpg" alt="Privatweg abwärts" loading="lazy">
+          <div class="caption">Privatweg abwärts</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/16vonPrivatwegAufStellplatz.jpg','Vom Privatweg auf Stellplatz')">
+          <img src="Buchholz_Quelle/16vonPrivatwegAufStellplatz.jpg" alt="Vom Privatweg auf Stellplatz" loading="lazy">
+          <div class="caption">Vom Privatweg auf Stellplatz</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/20 flügel im raum.png','Flügel im Raum')">
+          <img src="Buchholz_Quelle/20 flügel im raum.png" alt="Flügel im Raum" loading="lazy">
+          <div class="caption">Flügel im Raum</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/25 vom flügel zur Terrassentür.jpg','Vom Flügel zur Terrassentür')">
+          <img src="Buchholz_Quelle/25 vom flügel zur Terrassentür.jpg" alt="Vom Flügel zur Terrassentür" loading="lazy">
+          <div class="caption">Vom Flügel zur Terrassentür</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/30 von aussen auf terrassentür.jpg','Von außen auf Terrassentür')">
+          <img src="Buchholz_Quelle/30 von aussen auf terrassentür.jpg" alt="Von außen auf Terrassentür" loading="lazy">
+          <div class="caption">Von außen auf Terrassentür</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/35vonRasenAufTerrassentür.jpg','Vom Rasen auf Terrassentür')">
+          <img src="Buchholz_Quelle/35vonRasenAufTerrassentür.jpg" alt="Vom Rasen auf Terrassentür" loading="lazy">
+          <div class="caption">Vom Rasen auf Terrassentür</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/37aufTerrasse.jpg','Auf Terrasse')">
+          <img src="Buchholz_Quelle/37aufTerrasse.jpg" alt="Auf Terrasse" loading="lazy">
+          <div class="caption">Auf Terrasse</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/40RasenAufwärtsAmHaus.jpg','Rasen aufwärts am Haus')">
+          <img src="Buchholz_Quelle/40RasenAufwärtsAmHaus.jpg" alt="Rasen aufwärts am Haus" loading="lazy">
+          <div class="caption">Rasen aufwärts am Haus</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/45RasenRückblick.jpg','Rasen Rückblick')">
+          <img src="Buchholz_Quelle/45RasenRückblick.jpg" alt="Rasen Rückblick" loading="lazy">
+          <div class="caption">Rasen Rückblick</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/47nebenHausZumStellplatz.jpg','Neben Haus zum Stellplatz')">
+          <img src="Buchholz_Quelle/47nebenHausZumStellplatz.jpg" alt="Neben Haus zum Stellplatz" loading="lazy">
+          <div class="caption">Neben Haus zum Stellplatz</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Buchholz_Quelle/49AnkunftStellplatz.jpg','Ankunft Stellplatz')">
+          <img src="Buchholz_Quelle/49AnkunftStellplatz.jpg" alt="Ankunft Stellplatz" loading="lazy">
+          <div class="caption">Ankunft Stellplatz</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Abschnitt 2: Lüneburg Durchfahrt/Treppenhaus ── -->
+    <section class="section">
+      <div class="section-header">
+        <h2>2 · Lüneburg – Durchfahrt &amp; Treppenhaus</h2>
+      </div>
+      <div class="section-description">
+        Erläuterung folgt.
+      </div>
+      <div class="gallery" id="gallery-durchfahrt">
+        <div class="video-thumb" onclick="openLightboxVideo('lueneburg_Durchfahrt-Treppenhaus/4 LueneburgUeberTreppe.mp4','Lüneburg – Durchfahrt – Treppenhaus')">
+          <video src="lueneburg_Durchfahrt-Treppenhaus/4 LueneburgUeberTreppe.mp4" muted preload="metadata"></video>
+          <div class="video-play-icon"></div>
+          <div class="caption">Lüneburg – Durchfahrt – Treppenhaus</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/10 von Durchfahrt auf An der Skt Johanniskirche.jpg','Von Durchfahrt auf An der Skt. Johanniskirche')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/10 von Durchfahrt auf An der Skt Johanniskirche.jpg" alt="" loading="lazy">
+          <div class="caption">Von Durchfahrt auf An der Skt. Johanniskirche</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/15 auf Durchfahrt.jpg','Auf Durchfahrt')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/15 auf Durchfahrt.jpg" alt="Auf Durchfahrt" loading="lazy">
+          <div class="caption">Auf Durchfahrt</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/20 durch Durchfahrt auf Haustür.jpg','Durch Durchfahrt auf Haustür')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/20 durch Durchfahrt auf Haustür.jpg" alt="" loading="lazy">
+          <div class="caption">Durch Durchfahrt auf Haustür</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/25 von Haustür auf Durchfahrt.jpg','Von Haustür auf Durchfahrt')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/25 von Haustür auf Durchfahrt.jpg" alt="" loading="lazy">
+          <div class="caption">Von Haustür auf Durchfahrt</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/30 pflaster in Durchfahrt.jpg','Pflaster in Durchfahrt')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/30 pflaster in Durchfahrt.jpg" alt="" loading="lazy">
+          <div class="caption">Pflaster in Durchfahrt</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/35 aus Haustür auf Durchfahrt.jpg','Aus Haustür auf Durchfahrt')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/35 aus Haustür auf Durchfahrt.jpg" alt="" loading="lazy">
+          <div class="caption">Aus Haustür auf Durchfahrt</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/38 nach Haustür auf Treppe.jpg','Nach Haustür auf Treppe')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/38 nach Haustür auf Treppe.jpg" alt="" loading="lazy">
+          <div class="caption">Nach Haustür auf Treppe</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/42 auf Trepp1.jpg','Auf Treppe 1')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/42 auf Trepp1.jpg" alt="Auf Treppe 1" loading="lazy">
+          <div class="caption">Auf Treppe 1</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/44 Treppe 1 runter.jpg','Treppe 1 runter')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/44 Treppe 1 runter.jpg" alt="" loading="lazy">
+          <div class="caption">Treppe 1 runter</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/45 Treppenabsatz.jpg','Treppenabsatz')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/45 Treppenabsatz.jpg" alt="Treppenabsatz" loading="lazy">
+          <div class="caption">Treppenabsatz</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/46 auf Treppe2 auf Absatz.jpg','Auf Treppe 2, auf Absatz')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/46 auf Treppe2 auf Absatz.jpg" alt="" loading="lazy">
+          <div class="caption">Auf Treppe 2, auf Absatz</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/48 auf Treppenabsatz .jpg','Auf Treppenabsatz')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/48 auf Treppenabsatz .jpg" alt="" loading="lazy">
+          <div class="caption">Auf Treppenabsatz</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/50 auf Treppenabsatz.jpg','Auf Treppenabsatz')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/50 auf Treppenabsatz.jpg" alt="" loading="lazy">
+          <div class="caption">Auf Treppenabsatz</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/52 auf Treppenabsatz.jpg','Auf Treppenabsatz')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/52 auf Treppenabsatz.jpg" alt="" loading="lazy">
+          <div class="caption">Auf Treppenabsatz</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/53 Treppe 2 runter','Treppe 2 runter')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/53 Treppe 2 runter" alt="Treppe 2 runter" loading="lazy">
+          <div class="caption">Treppe 2 runter</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/54 von Treppe zu Haustür.jpg','Von Treppe zu Haustür')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/54 von Treppe zu Haustür.jpg" alt="" loading="lazy">
+          <div class="caption">Von Treppe zu Haustür</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/60 in Wohnungstür durch Flur in Wohnzimmer.jpg','In Wohnungstür durch Flur ins Wohnzimmer')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/60 in Wohnungstür durch Flur in Wohnzimmer.jpg" alt="" loading="lazy">
+          <div class="caption">In Wohnungstür durch Flur ins Wohnzimmer</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/62 von flur in wohnzimmer.jpg','Vom Flur ins Wohnzimmer')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/62 von flur in wohnzimmer.jpg" alt="" loading="lazy">
+          <div class="caption">Vom Flur ins Wohnzimmer</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/65 aus Wohnzimmer auf Haustür.jpg','Aus Wohnzimmer auf Haustür')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/65 aus Wohnzimmer auf Haustür.jpg" alt="" loading="lazy">
+          <div class="caption">Aus Wohnzimmer auf Haustür</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('lueneburg_Durchfahrt-Treppenhaus/80 Ziel Wohnzimmer.jpg','Ziel: Wohnzimmer')">
+          <img src="lueneburg_Durchfahrt-Treppenhaus/80 Ziel Wohnzimmer.jpg" alt="Ziel Wohnzimmer" loading="lazy">
+          <div class="caption">Ziel: Wohnzimmer</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Abschnitt 3: Lüneburg Kran/Mauer/Schlafzimmer ── -->
+    <section class="section">
+      <div class="section-header">
+        <h2>3 · Lüneburg – Ilmenaustr., Kran, Mauer, Terrasse, Schlafzimmer</h2>
+      </div>
+      <div class="section-description">
+        Erläuterung folgt.
+      </div>
+      <div class="gallery" id="gallery-kran">
+        <div class="video-thumb" onclick="openLightboxVideo('Lueneburg_Kran-Mauer-Schlafzi/7 Ilmenaustr-Kran-Mauer-Terrasse-Schlafzi-Wohnzi.mp4','Ilmenaustr. – Kran – Mauer – Terrasse – Schlafzimmer – Wohnzimmer')">
+          <video src="Lueneburg_Kran-Mauer-Schlafzi/7 Ilmenaustr-Kran-Mauer-Terrasse-Schlafzi-Wohnzi.mp4" muted preload="metadata"></video>
+          <div class="video-play-icon"></div>
+          <div class="caption">Ilmenaustr. – Kran – Mauer – Terrasse – Schlafzimmer</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/10 von ilmenaustr .jpg','Von Ilmenaustr.')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/10 von ilmenaustr .jpg" alt="" loading="lazy">
+          <div class="caption">Von Ilmenaustr.</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/15 von ilmenaustr.jpg','Von Ilmenaustr.')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/15 von ilmenaustr.jpg" alt="" loading="lazy">
+          <div class="caption">Von Ilmenaustr.</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/20 auf ilmenaustr.jpg','Auf Ilmenaustr.')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/20 auf ilmenaustr.jpg" alt="" loading="lazy">
+          <div class="caption">Auf Ilmenaustr.</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/25 auf ilmenaustr mauer runter.jpg','Auf Ilmenaustr. Mauer runter')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/25 auf ilmenaustr mauer runter.jpg" alt="" loading="lazy">
+          <div class="caption">Auf Ilmenaustr. Mauer runter</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/26 auf ilmenaustr mauer samstag.jpg','Auf Ilmenaustr. Mauer (Samstag)')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/26 auf ilmenaustr mauer samstag.jpg" alt="" loading="lazy">
+          <div class="caption">Auf Ilmenaustr. Mauer (Samstag)</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/30 auf Terrrassentür .jpg','Auf Terrassentür')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/30 auf Terrrassentür .jpg" alt="" loading="lazy">
+          <div class="caption">Auf Terrassentür</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/35 auf Terrassentür in Schlafzimmer.jpg','Auf Terrassentür ins Schlafzimmer')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/35 auf Terrassentür in Schlafzimmer.jpg" alt="" loading="lazy">
+          <div class="caption">Auf Terrassentür ins Schlafzimmer</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/37 aus Terrassentür Schlafzimmer.jpg','Aus Terrassentür, Schlafzimmer')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/37 aus Terrassentür Schlafzimmer.jpg" alt="" loading="lazy">
+          <div class="caption">Aus Terrassentür, Schlafzimmer</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/40 von schlazi in wohnzimmer.jpg','Vom Schlafzimmer ins Wohnzimmer')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/40 von schlazi in wohnzimmer.jpg" alt="" loading="lazy">
+          <div class="caption">Vom Schlafzimmer ins Wohnzimmer</div>
+        </div>
+        <div class="thumb" onclick="openLightbox('Lueneburg_Kran-Mauer-Schlafzi/45 in wohnzimmer.jpg','Im Wohnzimmer')">
+          <img src="Lueneburg_Kran-Mauer-Schlafzi/45 in wohnzimmer.jpg" alt="" loading="lazy">
+          <div class="caption">Im Wohnzimmer</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── Lightbox ── -->
+<div id="lightbox" onclick="closeLightboxOnBg(event)">
+  <button id="lightbox-close" onclick="closeLightbox()">&#215;</button>
+  <button id="lightbox-prev" onclick="navigate(-1)">&#8249;</button>
+  <div id="lightbox-media"></div>
+  <div id="lightbox-caption"></div>
+  <button id="lightbox-next" onclick="navigate(1)">&#8250;</button>
+</div>
+
+<script>
+  // ── Password check (SHA-256) ──
+  const CORRECT_HASH = '1894c89d63843999f83a468f085541464aa515b33c2346ef190b84c68ede62e2';
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function checkPassword() {
+    const val = document.getElementById('pwd-input').value;
+    const hash = await sha256(val);
+    if (hash === CORRECT_HASH) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+      sessionStorage.setItem('auth', '1');
+    } else {
+      document.getElementById('error-msg').style.display = 'block';
+      document.getElementById('pwd-input').select();
+    }
+  }
+
+  // Auto-login if already authenticated this session
+  if (sessionStorage.getItem('auth') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  }
+
+  // ── Lightbox ──
+  let currentItems = [];
+  let currentIndex = 0;
+
+  function buildItemList() {
+    // Collect all clickable media items in DOM order
+    currentItems = [];
+    document.querySelectorAll('.thumb, .video-thumb').forEach(el => {
+      const onclick = el.getAttribute('onclick') || '';
+      const match = onclick.match(/openLightbox(?:Video)?\('([^']+)','([^']+)'\)/);
+      if (match) {
+        currentItems.push({
+          src: match[1],
+          caption: match[2],
+          isVideo: onclick.startsWith('openLightboxVideo')
+        });
+      }
+    });
+  }
+
+  function openLightbox(src, caption) {
+    buildItemList();
+    currentIndex = currentItems.findIndex(i => i.src === src);
+    showItem(currentIndex);
+    document.getElementById('lightbox').classList.add('active');
+    document.addEventListener('keydown', handleKey);
+  }
+
+  function openLightboxVideo(src, caption) {
+    buildItemList();
+    currentIndex = currentItems.findIndex(i => i.src === src);
+    showItem(currentIndex);
+    document.getElementById('lightbox').classList.add('active');
+    document.addEventListener('keydown', handleKey);
+  }
+
+  function showItem(idx) {
+    const item = currentItems[idx];
+    const container = document.getElementById('lightbox-media');
+    container.innerHTML = '';
+    if (item.isVideo) {
+      const v = document.createElement('video');
+      v.src = item.src;
+      v.controls = true;
+      v.autoplay = true;
+      v.style.maxWidth = '92vw';
+      v.style.maxHeight = '85vh';
+      v.style.borderRadius = '4px';
+      container.appendChild(v);
+    } else {
+      const img = document.createElement('img');
+      img.src = item.src;
+      img.id = 'lightbox-media';
+      img.style.maxWidth = '92vw';
+      img.style.maxHeight = '85vh';
+      img.style.borderRadius = '4px';
+      img.style.objectFit = 'contain';
+      container.appendChild(img);
+    }
+    document.getElementById('lightbox-caption').textContent = item.caption;
+    document.getElementById('lightbox-prev').style.display = currentItems.length > 1 ? '' : 'none';
+    document.getElementById('lightbox-next').style.display = currentItems.length > 1 ? '' : 'none';
+  }
+
+  function navigate(dir) {
+    currentIndex = (currentIndex + dir + currentItems.length) % currentItems.length;
+    showItem(currentIndex);
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.getElementById('lightbox-media').innerHTML = '';
+    document.removeEventListener('keydown', handleKey);
+  }
+
+  function closeLightboxOnBg(e) {
+    if (e.target === document.getElementById('lightbox')) closeLightbox();
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft') navigate(-1);
+  }
+</script>
+</body>
+</html>
