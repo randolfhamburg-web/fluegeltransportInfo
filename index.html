@@ -551,7 +551,7 @@
 
 <script>
   // ── Password check (SHA-256) ──
-  const CORRECT_HASH = '1894c89d63843999f83a468f085541464aa515b33c2346ef190b84c68ede62e2';
+  const CORRECT_HASH = '3584375258475a03063cfb6c97b6d057f445b5958ffb466b7ea9f7d53e37fa3e';
 
   async function sha256(str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
